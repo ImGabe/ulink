@@ -61,7 +61,6 @@
 
 <div id="container">
 	<h1>µlink</h1>
-
 	{#if errors.length}
 		<div class="error" transition:fade>
 			{#each errors as error}
@@ -71,7 +70,6 @@
 			{/each}
 		</div>
 	{/if}
-
 	<input type="text" bind:value={urlInput} placeholder="enter your url" required={true} />
 	<input
 		type="number"
@@ -80,9 +78,7 @@
 		min="1"
 		required={true}
 	/>
-
 	<button type="button" on:click={doPost} class="btn">Shorten</button>
-
 	{#if shortenUrls.length}
 		<div id="menu" transition:fade>
 			{#each shortenUrls as { id, duration }}
@@ -95,11 +91,9 @@
 		</div>
 	{/if}
 </div>
-
 <div id="footer">
 	<a href="https://github.com/ImGabe" target="_blank">Github</a>
 </div>
-
 <svelte:body id="body" />
 
 <svelte:head>
