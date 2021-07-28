@@ -8,7 +8,7 @@ const template = ({ head, body }) => "<!DOCTYPE html>\n<html lang=\"en\">\n\t<he
 
 let options = null;
 
-const default_settings = { paths: {"base":"/ulink-frontend","assets":"/ulink-frontend"} };
+const default_settings = { paths: {"base":"","assets":"/."} };
 
 // allow paths to be overridden in svelte-kit preview
 // and in prerendering
@@ -20,13 +20,13 @@ export function init(settings = default_settings) {
 		amp: false,
 		dev: false,
 		entry: {
-			file: "/ulink-frontend/_app/start-9121c0e1.js",
-			css: ["/ulink-frontend/_app/assets/start-a8cd1609.css"],
-			js: ["/ulink-frontend/_app/start-9121c0e1.js","/ulink-frontend/_app/chunks/vendor-558e3855.js"]
+			file: "/./_app/start-98755a34.js",
+			css: ["/./_app/assets/start-a8cd1609.css"],
+			js: ["/./_app/start-98755a34.js","/./_app/chunks/vendor-3b25d21c.js"]
 		},
 		fetched: undefined,
 		floc: false,
-		get_component_path: id => "/ulink-frontend/_app/" + entry_lookup[id],
+		get_component_path: id => "/./_app/" + entry_lookup[id],
 		get_stack: error => String(error), // for security
 		handle_error: /** @param {Error & {frame?: string}} error */ (error) => {
 			if (error.frame) {
@@ -36,19 +36,29 @@ export function init(settings = default_settings) {
 			error.stack = options.get_stack(error);
 		},
 		hooks: get_hooks(user_hooks),
-		hydrate: true,
+		hydrate: async ({ page }) => {
+	const leaf = await page;
+	return 'hydrate' in leaf ? !!leaf.hydrate : true;
+},
 		initiator: undefined,
 		load_component,
 		manifest,
 		paths: settings.paths,
+		prerender: async ({ page }) => !!(await page).prerender,
 		read: settings.read,
 		root,
 		service_worker: null,
-		router: true,
-		ssr: false,
+		router: async ({ page }) => {
+	const leaf = await page;
+	return 'router' in leaf ? !!leaf.router : true;
+},
+		ssr: async ({ page }) => {
+	const leaf = await page;
+	return 'ssr' in leaf ? !!leaf.ssr : true;
+},
 		target: "#svelte",
 		template,
-		trailing_slash: "ignore"
+		trailing_slash: "never"
 	};
 }
 
@@ -89,7 +99,7 @@ const module_lookup = {
 	".svelte-kit/build/components/layout.svelte": () => import("./components/layout.svelte"),".svelte-kit/build/components/error.svelte": () => import("./components/error.svelte"),"src/routes/index.svelte": () => import("../../src/routes/index.svelte"),"src/routes/duration.svelte": () => import("../../src/routes/duration.svelte")
 };
 
-const metadata_lookup = {".svelte-kit/build/components/layout.svelte":{"entry":"/ulink-frontend/_app/layout.svelte-7c1ad1c3.js","css":[],"js":["/ulink-frontend/_app/layout.svelte-7c1ad1c3.js","/ulink-frontend/_app/chunks/vendor-558e3855.js"],"styles":[]},".svelte-kit/build/components/error.svelte":{"entry":"/ulink-frontend/_app/error.svelte-18b12380.js","css":[],"js":["/ulink-frontend/_app/error.svelte-18b12380.js","/ulink-frontend/_app/chunks/vendor-558e3855.js"],"styles":[]},"src/routes/index.svelte":{"entry":"/ulink-frontend/_app/pages/index.svelte-8c3098df.js","css":[],"js":["/ulink-frontend/_app/pages/index.svelte-8c3098df.js","/ulink-frontend/_app/chunks/vendor-558e3855.js","/ulink-frontend/_app/pages/duration.svelte-f15a3bde.js"],"styles":[]},"src/routes/duration.svelte":{"entry":"/ulink-frontend/_app/pages/duration.svelte-f15a3bde.js","css":[],"js":["/ulink-frontend/_app/pages/duration.svelte-f15a3bde.js","/ulink-frontend/_app/chunks/vendor-558e3855.js"],"styles":[]}};
+const metadata_lookup = {".svelte-kit/build/components/layout.svelte":{"entry":"/./_app/layout.svelte-64846485.js","css":[],"js":["/./_app/layout.svelte-64846485.js","/./_app/chunks/vendor-3b25d21c.js"],"styles":[]},".svelte-kit/build/components/error.svelte":{"entry":"/./_app/error.svelte-1e924bf1.js","css":[],"js":["/./_app/error.svelte-1e924bf1.js","/./_app/chunks/vendor-3b25d21c.js"],"styles":[]},"src/routes/index.svelte":{"entry":"/./_app/pages/index.svelte-f26822e9.js","css":[],"js":["/./_app/pages/index.svelte-f26822e9.js","/./_app/chunks/vendor-3b25d21c.js","/./_app/pages/duration.svelte-b07578c0.js"],"styles":[]},"src/routes/duration.svelte":{"entry":"/./_app/pages/duration.svelte-b07578c0.js","css":[],"js":["/./_app/pages/duration.svelte-b07578c0.js","/./_app/chunks/vendor-3b25d21c.js"],"styles":[]}};
 
 async function load_component(file) {
 	return {

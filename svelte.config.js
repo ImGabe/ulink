@@ -11,15 +11,8 @@ const config = {
 	kit: {
 		adapter: netlify(),
 
-		paths: {
-			base: '/ulink-frontend'
-		},
-
-		ssr: false,
-
 		// hydrate the <div id="svelte"> element in src/app.html
 		target: '#svelte',
-		trailingSlash: 'ignore'
 	}
 };
 

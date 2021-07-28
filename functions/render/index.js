@@ -13834,6 +13834,12 @@ function lowercase_keys(obj) {
 function coalesce_to_error(err) {
   return err instanceof Error ? err : new Error(JSON.stringify(err));
 }
+async function resolve_option(opt, ctx) {
+  if (typeof opt === "function") {
+    return await opt(ctx);
+  }
+  return opt;
+}
 async function respond_with_error({ request, options: options2, state, $session, status, error: error3 }) {
   const default_layout = await options2.load_component(options2.manifest.layout);
   const default_error = await options2.load_component(options2.manifest.error);
@@ -13872,15 +13878,18 @@ async function respond_with_error({ request, options: options2, state, $session,
       error: error3
     })
   ];
+  const leaf_promise = async () => branch[branch.length - 1].node.module;
+  const page_config = {
+    ssr: await resolve_option(options2.ssr, { request, page: leaf_promise }),
+    router: await resolve_option(options2.router, { request, page: leaf_promise }),
+    hydrate: await resolve_option(options2.hydrate, { request, page: leaf_promise }),
+    prerender: await resolve_option(options2.prerender, { request, page: leaf_promise })
+  };
   try {
     return await render_response({
       options: options2,
       $session,
-      page_config: {
-        hydrate: options2.hydrate,
-        router: options2.router,
-        ssr: options2.ssr
-      },
+      page_config,
       status,
       error: error3,
       branch,
@@ -13905,28 +13914,14 @@ async function respond$1({ request, options: options2, state, $session, route })
     query: request.query,
     params
   };
-  let nodes;
-  try {
-    nodes = await Promise.all(route.a.map((id) => options2.load_component(id)));
-  } catch (err) {
-    const error4 = coalesce_to_error(err);
-    options2.handle_error(error4);
-    return await respond_with_error({
-      request,
-      options: options2,
-      state,
-      $session,
-      status: 500,
-      error: error4
-    });
-  }
-  const leaf = nodes[nodes.length - 1].module;
+  const leaf_promise = options2.load_component(route.a[route.a.length - 1]).then((c) => c.module);
   const page_config = {
-    ssr: "ssr" in leaf ? !!leaf.ssr : options2.ssr,
-    router: "router" in leaf ? !!leaf.router : options2.router,
-    hydrate: "hydrate" in leaf ? !!leaf.hydrate : options2.hydrate
+    ssr: await resolve_option(options2.ssr, { request, page: leaf_promise }),
+    router: await resolve_option(options2.router, { request, page: leaf_promise }),
+    hydrate: await resolve_option(options2.hydrate, { request, page: leaf_promise }),
+    prerender: await resolve_option(options2.prerender, { request, page: leaf_promise })
   };
-  if (!leaf.prerender && state.prerender && !state.prerender.all) {
+  if (state.prerender && !state.prerender.all && !page_config.prerender) {
     return {
       status: 204,
       headers: {},
@@ -13938,6 +13933,21 @@ async function respond$1({ request, options: options2, state, $session, route })
   let error3;
   ssr:
     if (page_config.ssr) {
+      let nodes;
+      try {
+        nodes = await Promise.all(route.a.map((id) => options2.load_component(id)));
+      } catch (err) {
+        const error4 = coalesce_to_error(err);
+        options2.handle_error(error4);
+        return await respond_with_error({
+          request,
+          options: options2,
+          state,
+          $session,
+          status: 500,
+          error: error4
+        });
+      }
       let context = {};
       branch = [];
       for (let i = 0; i < nodes.length; i += 1) {
@@ -14292,7 +14302,7 @@ async function respond(incoming, options2, state = {}) {
           return await render_response({
             options: options2,
             $session: await options2.hooks.getSession(request),
-            page_config: { ssr: false, router: true, hydrate: true },
+            page_config: { ssr: false, router: true, hydrate: true, prerender: true },
             status: 200,
             branch: []
           });
@@ -14476,7 +14486,7 @@ var user_hooks = /* @__PURE__ */ Object.freeze({
 });
 var template = ({ head, body }) => '<!DOCTYPE html>\n<html lang="en">\n	<head>\n		<meta charset="utf-8" />\n		<link rel="icon" href="/favicon.png" />\n		<meta name="viewport" content="width=device-width, initial-scale=1" />\n		' + head + '\n	</head>\n	<body>\n		<div id="svelte">' + body + "</div>\n	</body>\n</html>\n";
 var options = null;
-var default_settings = { paths: { "base": "/ulink-frontend", "assets": "/ulink-frontend" } };
+var default_settings = { paths: { "base": "", "assets": "/." } };
 function init(settings = default_settings) {
   set_paths(settings.paths);
   set_prerendering(settings.prerendering || false);
@@ -14484,13 +14494,13 @@ function init(settings = default_settings) {
     amp: false,
     dev: false,
     entry: {
-      file: "/ulink-frontend/_app/start-9121c0e1.js",
-      css: ["/ulink-frontend/_app/assets/start-a8cd1609.css"],
-      js: ["/ulink-frontend/_app/start-9121c0e1.js", "/ulink-frontend/_app/chunks/vendor-558e3855.js"]
+      file: "/./_app/start-98755a34.js",
+      css: ["/./_app/assets/start-a8cd1609.css"],
+      js: ["/./_app/start-98755a34.js", "/./_app/chunks/vendor-3b25d21c.js"]
     },
     fetched: void 0,
     floc: false,
-    get_component_path: (id) => "/ulink-frontend/_app/" + entry_lookup[id],
+    get_component_path: (id) => "/./_app/" + entry_lookup[id],
     get_stack: (error22) => String(error22),
     handle_error: (error22) => {
       if (error22.frame) {
@@ -14500,19 +14510,29 @@ function init(settings = default_settings) {
       error22.stack = options.get_stack(error22);
     },
     hooks: get_hooks(user_hooks),
-    hydrate: true,
+    hydrate: async ({ page }) => {
+      const leaf = await page;
+      return "hydrate" in leaf ? !!leaf.hydrate : true;
+    },
     initiator: void 0,
     load_component,
     manifest,
     paths: settings.paths,
+    prerender: async ({ page }) => !!(await page).prerender,
     read: settings.read,
     root: Root,
     service_worker: null,
-    router: true,
-    ssr: false,
+    router: async ({ page }) => {
+      const leaf = await page;
+      return "router" in leaf ? !!leaf.router : true;
+    },
+    ssr: async ({ page }) => {
+      const leaf = await page;
+      return "ssr" in leaf ? !!leaf.ssr : true;
+    },
     target: "#svelte",
     template,
-    trailing_slash: "ignore"
+    trailing_slash: "never"
   };
 }
 var empty = () => ({});
@@ -14556,7 +14576,7 @@ var module_lookup = {
     return duration;
   })
 };
-var metadata_lookup = { ".svelte-kit/build/components/layout.svelte": { "entry": "/ulink-frontend/_app/layout.svelte-7c1ad1c3.js", "css": [], "js": ["/ulink-frontend/_app/layout.svelte-7c1ad1c3.js", "/ulink-frontend/_app/chunks/vendor-558e3855.js"], "styles": [] }, ".svelte-kit/build/components/error.svelte": { "entry": "/ulink-frontend/_app/error.svelte-18b12380.js", "css": [], "js": ["/ulink-frontend/_app/error.svelte-18b12380.js", "/ulink-frontend/_app/chunks/vendor-558e3855.js"], "styles": [] }, "src/routes/index.svelte": { "entry": "/ulink-frontend/_app/pages/index.svelte-8c3098df.js", "css": [], "js": ["/ulink-frontend/_app/pages/index.svelte-8c3098df.js", "/ulink-frontend/_app/chunks/vendor-558e3855.js", "/ulink-frontend/_app/pages/duration.svelte-f15a3bde.js"], "styles": [] }, "src/routes/duration.svelte": { "entry": "/ulink-frontend/_app/pages/duration.svelte-f15a3bde.js", "css": [], "js": ["/ulink-frontend/_app/pages/duration.svelte-f15a3bde.js", "/ulink-frontend/_app/chunks/vendor-558e3855.js"], "styles": [] } };
+var metadata_lookup = { ".svelte-kit/build/components/layout.svelte": { "entry": "/./_app/layout.svelte-64846485.js", "css": [], "js": ["/./_app/layout.svelte-64846485.js", "/./_app/chunks/vendor-3b25d21c.js"], "styles": [] }, ".svelte-kit/build/components/error.svelte": { "entry": "/./_app/error.svelte-1e924bf1.js", "css": [], "js": ["/./_app/error.svelte-1e924bf1.js", "/./_app/chunks/vendor-3b25d21c.js"], "styles": [] }, "src/routes/index.svelte": { "entry": "/./_app/pages/index.svelte-f26822e9.js", "css": [], "js": ["/./_app/pages/index.svelte-f26822e9.js", "/./_app/chunks/vendor-3b25d21c.js", "/./_app/pages/duration.svelte-b07578c0.js"], "styles": [] }, "src/routes/duration.svelte": { "entry": "/./_app/pages/duration.svelte-b07578c0.js", "css": [], "js": ["/./_app/pages/duration.svelte-b07578c0.js", "/./_app/chunks/vendor-3b25d21c.js"], "styles": [] } };
 async function load_component(file) {
   return {
     module: await module_lookup[file](),

@@ -226,7 +226,7 @@ class Router {
 			throw new Error('Attempted to prefetch a URL that does not belong to this app');
 		}
 
-		// @ts-ignore
+		// @ts-expect-error
 		return this.renderer.load(info);
 	}
 
@@ -260,13 +260,13 @@ class Router {
 			}
 		}
 
-		// @ts-ignore6
+		// @ts-expect-error
 		this.renderer.notify({
 			path: info.path,
 			query: info.query
 		});
 
-		// @ts-ignore
+		// @ts-expect-error
 		await this.renderer.update(info, chain, false);
 
 		if (!keepfocus) {
@@ -438,9 +438,9 @@ class Renderer {
 
 		/** @type {import('./types').NavigationState} */
 		this.current = {
-			// @ts-ignore
+			// @ts-expect-error
 			page: null,
-			// @ts-ignore
+			// @ts-expect-error
 			session_id: null,
 			branch: []
 		};
@@ -554,7 +554,7 @@ class Renderer {
 		dispatchEvent(new CustomEvent('sveltekit:navigation-start'));
 
 		if (this.started) {
-			// @ts-ignore
+			// @ts-expect-error
 			this.stores.navigating.set({
 				from: {
 					path: this.current.page.path,
@@ -683,7 +683,7 @@ class Renderer {
 	 */
 	async _get_navigation_result(info, no_cache) {
 		if (this.loading.id === info.id) {
-			// @ts-ignore if the id is defined then the promise is too
+			// @ts-expect-error if the id is defined then the promise is too
 			return this.loading.promise;
 		}
 
@@ -900,7 +900,7 @@ class Renderer {
 		}
 
 		const [pattern, a, b, get_params] = route;
-		// @ts-ignore - the pattern is for the route which we've already matched to this path
+		// @ts-expect-error - the pattern is for the route which we've already matched to this path
 		const params = get_params ? get_params(pattern.exec(path)) : {};
 
 		const changed = this.current.page && {
@@ -1079,7 +1079,7 @@ class Renderer {
 	}
 }
 
-// @ts-ignore
+// @ts-expect-error
 
 /** @param {{
  *   paths: {
