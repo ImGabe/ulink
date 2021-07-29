@@ -2,7 +2,7 @@
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
 
-	import DurationTick from './duration.svelte';
+	import DurationTick from '../duration.svelte';
 
 	interface ShortUrlJson {
 		id: string;
