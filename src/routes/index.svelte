@@ -1,7 +1,6 @@
 <script lang="typescript">
 	import { fade, slide } from 'svelte/transition';
 	import { quintOut } from 'svelte/easing';
-
 	import DurationTick from '../duration.svelte';
 
 	interface ShortUrlJson {
