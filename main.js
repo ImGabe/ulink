@@ -28,7 +28,7 @@ const appendItem = ({ id, duration }) => {
   item.classList.add("item");
 
   const anchor = document.createElement("a");
-  anchor.href = `${window.location.origin}#${id}`;
+  anchor.href = `${window.location.href}#${id}`;
   anchor.innerText = id;
   anchor.target = "_blank";
 
@@ -41,7 +41,7 @@ const appendItem = ({ id, duration }) => {
   spanCopy.classList.add("copy");
   spanCopy.innerText = "Copy";
   spanCopy.onclick = async () => {
-    const url = `${window.location.origin}#${id}`;
+    const url = `${window.location.href}#${id}`;
     await navigator.clipboard.writeText(url).catch(console.error);
   };
 
@@ -53,8 +53,6 @@ const appendItem = ({ id, duration }) => {
 
 const filterError = (url, duration) => {
   const errors = [];
-
-  console.log(url);
 
   if (!url) errors.push("The URL field is empty.");
   duration ?? errors.push("The duration field is empty.");
