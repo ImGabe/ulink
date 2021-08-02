@@ -103,7 +103,7 @@ checkbox.addEventListener(
 
 button.addEventListener("click", async () => {
   const url = urlInput.value;
-  const duration = Math.trunc(numberInput.value) || 0;
+  const duration = Math.trunc(numberInput.value) || null;
 
   // if have any error stop here
   if (filterError(url, duration)) return;
