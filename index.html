@@ -15,16 +15,27 @@
 
       <div id="error"></div>
 
-      <input id="input-url" type="text" placeholder="enter your url" required />
       <input
-        id="input-number"
-        type="number"
-        placeholder="enter seconds duration"
-        min="1"
+        type="text"
+        class="input-field"
+        id="input-url"
+        placeholder="Enter your url."
         required
       />
 
-      <button id="btn" type="button" class="btn">Shorten</button>
+      <div class="test">
+        <input
+          type="number"
+          class="input-field"
+          id="input-number"
+          placeholder="Enter duration in seconds."
+          min="1"
+        />
+
+        <input type="checkbox" id="checkbox" />
+      </div>
+
+      <button id="button" type="button" class="btn">Shorten</button>
 
       <div id="menu"></div>
     </div>
