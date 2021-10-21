@@ -5,7 +5,7 @@ const button = document.querySelector("#button");
 const error = document.querySelector("#error");
 const menu = document.querySelector("#menu");
 
-const urlRequest = "https://ec2-18-222-205-41.us-east-2.compute.amazonaws.com/";
+const urlRequest = "https://ec2-18-117-79-58.us-east-2.compute.amazonaws.com/";
 
 if (window.location.hash !== "") {
   const hash = window.location.hash.substr(1);
