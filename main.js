@@ -5,7 +5,7 @@ const button = document.querySelector("#button");
 const error = document.querySelector("#error");
 const menu = document.querySelector("#menu");
 
-const urlRequest = "https://ulink.imgabe.me";
+const urlRequest = "https://ulink.imgabe.me/";
 
 if (window.location.hash !== "") {
   const hash = window.location.hash.substr(1);
